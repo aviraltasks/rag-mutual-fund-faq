@@ -6,14 +6,22 @@ Set env GEMINI_API_KEY for LLM. PORT defaults to 8000.
 """
 import os
 import sys
+import importlib.util
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-# Order matters: Phase 02's config (CHUNKS_PATH, VECTORS_PATH) must be found before Phase 04's config
-paths = [str(ROOT), str(ROOT / "Phase 02- backend"), str(ROOT / "Phase 03- llm_response"), str(ROOT / "Phase 04- safety"), str(ROOT / "Phase 05- frontend")]
-for p in reversed(paths):
+# Ensure all phase dirs are on path
+for p in [str(ROOT), str(ROOT / "Phase 02- backend"), str(ROOT / "Phase 03- llm_response"), str(ROOT / "Phase 04- safety"), str(ROOT / "Phase 05- frontend")]:
     if p not in sys.path:
         sys.path.insert(0, p)
+
+# Force root config (CHUNKS_PATH, VECTORS_PATH, GEMINI_API_KEY from env) so Phase 02 and Phase 03 both get it
+_root_config = ROOT / "config.py"
+if _root_config.exists():
+    _spec = importlib.util.spec_from_file_location("config", _root_config)
+    _config = importlib.util.module_from_spec(_spec)
+    sys.modules["config"] = _config
+    _spec.loader.exec_module(_config)
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
