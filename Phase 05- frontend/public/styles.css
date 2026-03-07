@@ -675,7 +675,7 @@ body {
   text-decoration: underline;
 }
 
-/* Narrow layout: stack columns */
+/* Narrow layout: stack columns + mobile tweaks */
 @media (max-width: 768px) {
   .app.layout-two-col,
   .app.layout-three-col {
@@ -685,20 +685,66 @@ body {
   .sidebar,
   .sidebar-left {
     width: 100%;
+    order: 2;
   }
 
   .sidebar-right.top-searches-sidebar {
     width: 100%;
     height: auto;
     max-height: none;
-    order: 2;
+    order: 3;
   }
 
   .chat-panel {
     order: 1;
+    height: auto;
+    max-height: none;
   }
 
   .chat-messages {
     max-height: min(60vh, 520px);
+  }
+
+  /* Prevent Send button from shrinking / truncating to "Sen" */
+  .chat-form {
+    flex-wrap: nowrap;
+  }
+  .chat-send {
+    flex-shrink: 0;
+    min-width: 4.5rem;
+  }
+  .chat-input {
+    min-width: 0;
+  }
+
+  /* Chips and suggested questions: wrap long text instead of truncating */
+  .chip {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    text-align: left;
+    white-space: normal;
+  }
+  .top-searches-list .ask-about-link {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  /* Credit / footer: spacing and link wrap so URL and "last updated" don't overlap */
+  .chat-panel-credit {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .credit p {
+    margin: 0.4rem 0;
+  }
+  .credit a {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+  .last-updated-line {
+    word-break: break-word;
+    margin-bottom: 0.5rem;
   }
 }
