@@ -680,12 +680,15 @@ body {
   .app.layout-two-col,
   .app.layout-three-col {
     flex-direction: column;
+    gap: 1.25rem;
   }
 
   .sidebar,
   .sidebar-left {
     width: 100%;
     order: 2;
+    position: relative;
+    z-index: 1;
   }
 
   .sidebar-right.top-searches-sidebar {
@@ -695,11 +698,14 @@ body {
     order: 3;
   }
 
+  /* Chat panel first in stack; contain it so it never overlaps the sidebar below */
   .chat-panel {
     order: 1;
     height: auto;
     max-height: none;
-    overflow: visible;
+    overflow: hidden;
+    position: relative;
+    z-index: 0;
   }
 
   /* Bordered area: use content height so credit never overlaps form */
