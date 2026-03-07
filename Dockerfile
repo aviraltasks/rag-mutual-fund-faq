@@ -7,13 +7,8 @@ WORKDIR /app
 COPY requirements-backend.txt .
 RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-backend.txt
 
-# Copy app and all phases needed at runtime
-COPY backend_server.py .
-COPY "Phase 01- data" "Phase 01- data"
-COPY "Phase 02- backend" "Phase 02- backend"
-COPY "Phase 03- llm_response" "Phase 03- llm_response"
-COPY "Phase 04- safety" "Phase 04- safety"
-COPY "Phase 05- frontend" "Phase 05- frontend"
+# Copy app (single COPY avoids quoting issues with folder names that have spaces)
+COPY . .
 
 ENV PORT=8000
 EXPOSE 8000
