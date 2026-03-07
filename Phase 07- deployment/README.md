@@ -26,6 +26,8 @@
    No trailing slash. Then trigger a **Redeploy** so the frontend uses this API.
 4. Without `BACKEND_URL`, the app loads but chat requests go to same-origin and will 404 until the backend is set.
 
+**If production still shows old UI (e.g. old placeholder, mobile issues):** The live site may be an old deployment. In Vercel → **Deployments**, trigger **Redeploy** from branch **main** (or promote the latest deployment that has the latest commit). Production must use a build from the latest `main` to get mobile fixes and updated copy.
+
 ## 3. Summary
 
 | Part      | Where   | What runs |

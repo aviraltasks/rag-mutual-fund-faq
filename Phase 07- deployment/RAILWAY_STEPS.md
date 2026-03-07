@@ -31,11 +31,11 @@ Repo has a **Dockerfile** so Railway uses Docker (avoids "Error creating build p
 - Click **"Generate Domain"** (or "Add a domain" / "Create domain").
 - Copy the URL (e.g. `https://web-production-xxxx.up.railway.app`). This is your **backend URL**.
 
-### Step 4: Connect Vercel to this backend
-- In **Vercel** → your project **rag-mutual-fund-faq** → **Settings** → **Environment Variables**.
-- Add: **Name** `BACKEND_URL`, **Value** = the Railway URL from Step 3 (no trailing slash).
-- Go to **Deployments** → click the **⋮** on the latest deployment → **Redeploy**.
-- Open https://rag-mutual-fund-faq.vercel.app and try a chat.
+### Step 4: Connect Vercel to this backend (no Railway “Integrations” needed)
+- In **Vercel** → your project (e.g. **rag-mutual-fund-faq**) → **Settings** → **Environment Variables**.
+- Add: **Name** `BACKEND_URL`, **Value** = the Railway URL from Step 3 (no trailing slash), e.g. `https://rag-mutual-fund-faq-production-xxxx.up.railway.app`.
+- Save, then go to **Deployments** → **⋮** on the latest deployment → **Redeploy** (so the frontend rebuilds with the new URL).
+- Open your Vercel app URL and try a chat.
 
 ---
 
