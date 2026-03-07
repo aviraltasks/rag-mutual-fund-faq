@@ -1,0 +1,37 @@
+# Environment and secrets
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Optional: uncomment to avoid committing large generated data (scheduler can regenerate)
+# Phase 01- data/raw/
+# Phase 01- data/cleaned/
+# Phase 01- data/chunks/
+# Phase 01- data/embeddings/
+# Phase 01- data/manifest/
+# Phase 01- data/last_scraped.txt

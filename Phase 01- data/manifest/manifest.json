@@ -1,0 +1,35 @@
+{
+  "sources": [
+    {
+      "fund_name": "SBI ELSS Tax Saver Fund",
+      "chunk_count": 8
+    },
+    {
+      "fund_name": "SBI Flexicap Fund",
+      "chunk_count": 4
+    },
+    {
+      "fund_name": "SBI Large Cap Fund",
+      "chunk_count": 5
+    },
+    {
+      "fund_name": "SBI Nifty Index Fund",
+      "chunk_count": 6
+    },
+    {
+      "fund_name": "SBI US Specific Equity Active FoF Fund",
+      "chunk_count": 5
+    }
+  ],
+  "total_chunks": 28,
+  "paths": {
+    "chunks": "chunks\\chunks.json",
+    "embeddings_vectors": "embeddings\\vectors.npy",
+    "embeddings_metadata": "embeddings\\chunk_metadata.json"
+  },
+  "config": {
+    "chunk_size": 450,
+    "chunk_overlap": 80,
+    "embedding_model": "all-MiniLM-L6-v2"
+  }
+}

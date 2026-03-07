@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutual Fund FAQ Assistant</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-wrapper">
+    <div class="app layout-three-col">
+      <!-- Left sidebar -->
+      <aside class="sidebar sidebar-left">
+        <header class="sidebar-header">
+          <span class="icon-robot" aria-hidden="true"></span>
+          <h1>Mutual Fund FAQ Assistant</h1>
+          <p class="tagline">Factual mutual fund information. No investment advice.</p>
+        </header>
+        <section class="schemes">
+          <h2 class="sidebar-section-title dark">Schemes Covered</h2>
+          <ul class="scheme-list">
+            <li><span class="dot"></span>SBI US Specific Equity Active Fof Fund</li>
+            <li><span class="dot"></span>SBI Nifty Index Fund</li>
+            <li><span class="dot"></span>SBI Flexicap Fund</li>
+            <li><span class="dot"></span>SBI ELSS Tax Saver Fund</li>
+            <li><span class="dot"></span>SBI Large Cap Fund</li>
+          </ul>
+        </section>
+        <section class="examples">
+          <h2 class="sidebar-section-title">Example Questions</h2>
+          <div class="example-chips">
+            <button type="button" class="chip" data-query="What is the expense ratio of SBI ELSS Tax Saver Fund?"><span class="dot"></span>What is the expense ratio of SBI ELSS Tax Saver Fund?</button>
+            <button type="button" class="chip" data-query="How long is the lock-in period for SBI ELSS?"><span class="dot"></span>How long is the lock-in period for SBI ELSS?</button>
+            <button type="button" class="chip" data-query="Which benchmark does SBI Large Cap Fund follow?"><span class="dot"></span>Which benchmark does SBI Large Cap Fund follow?</button>
+            <button type="button" class="chip" data-query="What is the current NAV of SBI Flexicap Fund?"><span class="dot"></span>What is the current NAV of SBI Flexicap Fund?</button>
+            <button type="button" class="chip" data-query="What is the minimum SIP amount for SBI Nifty Index Fund?"><span class="dot"></span>What is the minimum SIP amount for SBI Nifty Index Fund?</button>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Right chat panel -->
+      <div class="chat-panel">
+        <header class="chat-header">
+          <span class="icon-robot" aria-hidden="true"></span>
+          <h2>Get Instant Answers About Mutual Funds</h2>
+        </header>
+        <div class="disclaimer banner">
+          <strong>Disclaimer:</strong> This chatbot provides factual information from public sources only and does not provide investment advice.
+        </div>
+        <div class="chat-area-bordered">
+          <div id="chat-messages" class="chat-messages">
+            <div class="msg assistant welcome-msg">
+              <div class="msg-text">Hello! I can answer factual mutual fund questions.</div>
+            </div>
+          </div>
+          <form id="chat-form" class="chat-form">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Ask a mutual fund question..." autocomplete="off">
+            <button type="submit" class="chat-send">Send</button>
+          </form>
+          <footer class="chat-panel-footer">
+            <p id="last-updated-footer" class="last-updated-line" aria-live="polite">—</p>
+          </footer>
+        </div>
+        <div class="chat-panel-credit">
+          <div class="credit">
+            <p>RAG and Gen AI based Mutual Fund FAQ Chatbot</p>
+            <p>Project created by Aviral Rawat</p>
+            <p><a href="https://www.linkedin.com/in/aviralrawat/" target="_blank" rel="noopener">https://www.linkedin.com/in/aviralrawat/</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right sidebar: Top Searches -->
+      <aside class="sidebar sidebar-right top-searches-sidebar">
+        <h2 class="top-searches-heading">Frequently Searched Examples<br><span class="top-searches-sub">(Please feel free to replace scheme name of your choice.)</span></h2>
+        <ul class="top-searches-list">
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the expense ratio of SBI US Specific Equity Active FoF Fund?">→ Expense ratio</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the lock-in period for SBI US Specific Equity Active FoF Fund?">→ Lock In</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the minimum SIP for SBI US Specific Equity Active FoF Fund?">→ Minimum SIP</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the exit load for SBI US Specific Equity Active FoF Fund?">→ Exit Load</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the risk for SBI US Specific Equity Active FoF Fund?">→ Risk</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the benchmark of SBI US Specific Equity Active FoF Fund?">→ Benchmark</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the AUM of SBI US Specific Equity Active FoF Fund?">→ AUM</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the inception date of SBI US Specific Equity Active FoF Fund?">→ Inception Date</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the turnover of SBI US Specific Equity Active FoF Fund?">→ TurnOver</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="Tell me about SBI US Specific Equity Active FoF Fund">→ About (Fund)</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="Who is the fund manager of SBI US Specific Equity Active FoF Fund?">→ Fund Manager</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="How do I invest in SBI US Specific Equity Active FoF Fund?">→ How Do I Invest</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the NAV of SBI US Specific Equity Active FoF Fund?">→ NAV</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the Fund vs Competition for SBI US Specific Equity Active FoF Fund?">→ Fund vs Competition</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the fund ranking for SBI US Specific Equity Active FoF Fund?">→ Fund Comparison</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What are the pros and cons of SBI US Specific Equity Active FoF Fund?">→ Fund Pros and Cons</button></li>
+          <li><button type="button" class="ask-about-link" data-scheme="SBI US Specific Equity Active FoF Fund" data-query="What is the returns calculator for SBI US Specific Equity Active FoF Fund?">→ Fund Returns Calculator</button></li>
+        </ul>
+        <div id="scheme-hint" class="top-searches-scheme-hint" aria-live="polite" style="display: none;">Scheme in this example: <strong id="scheme-hint-name">SBI US Specific Equity Active FoF Fund</strong> <em>(Replace with any scheme listed under "Schemes Covered" on the left.)</em></div>
+      </aside>
+    </div>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
