@@ -9,7 +9,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-for p in [str(ROOT), str(ROOT / "Phase 02- backend"), str(ROOT / "Phase 03- llm_response"), str(ROOT / "Phase 04- safety"), str(ROOT / "Phase 05- frontend")]:
+# Order matters: Phase 02's config (CHUNKS_PATH, VECTORS_PATH) must be found before Phase 04's config
+paths = [str(ROOT), str(ROOT / "Phase 02- backend"), str(ROOT / "Phase 03- llm_response"), str(ROOT / "Phase 04- safety"), str(ROOT / "Phase 05- frontend")]
+for p in reversed(paths):
     if p not in sys.path:
         sys.path.insert(0, p)
 
