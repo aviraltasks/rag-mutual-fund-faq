@@ -1,5 +1,6 @@
 (function () {
-  const API_BASE = ''; // same origin when served by orchestrator
+  // On Vercel, API is under /api; when run by Phase 05 server locally, same-origin /chat and /last-updated
+  const API_BASE = (typeof window !== 'undefined' && window.API_BASE) || '';
   const CHAT_URL = API_BASE + '/chat';
   const LAST_UPDATED_URL = API_BASE + '/last-updated';
 

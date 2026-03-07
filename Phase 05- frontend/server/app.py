@@ -264,6 +264,100 @@ def _is_no_info_answer(answer: str) -> bool:
     return "don't have that information" in a or "do not have that information" in a
 
 
+def run_chat_flow_sync(
+    query: str,
+    safety_fn=None,
+    retrieve_fn=None,
+    llm_fn=None,
+) -> dict:
+    """Run safety -> retrieve -> LLM synchronously with optional in-process callables.
+    For Vercel serverless: pass safety_fn, retrieve_fn, llm_fn so no HTTP is used.
+    Each: safety_fn(query) -> {allowed, refusal_message, educational_link};
+          retrieve_fn(query) -> list of chunk dicts;
+          llm_fn(query, chunks) -> {answer, citation_url, last_updated_note}.
+    """
+    query = (query or "").strip()
+    if not query:
+        return {"error": "Query is required"}
+    query_for_retrieval = _normalize_query_for_retrieval(query)
+    query_for_retrieval = expand_query_for_retrieval(query_for_retrieval)
+    cache_key = _cache_key(query)
+    cached = _response_cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    if safety_fn:
+        safety = safety_fn(query)
+        if not safety.get("allowed", True):
+            out = {
+                "refusal": True,
+                "message": safety.get("refusal_message") or "I'm here only for factual info on the schemes in my sources.",
+                "educational_link": safety.get("educational_link"),
+            }
+            _response_cache_set(cache_key, out)
+            return out
+
+    if _query_mentions_unsupported_fund(query):
+        out = {
+            "refusal": False,
+            "answer": f"We don't have that fund in our sources. We only cover: {COVERED_SCHEMES_LIST}",
+            "citation_url": "",
+            "last_updated_note": _last_updated_note(),
+        }
+        _response_cache_set(cache_key, out)
+        return out
+
+    if retrieve_fn:
+        chunks = retrieve_fn(query_for_retrieval)
+    else:
+        chunks = []
+
+    if not chunks:
+        out = {
+            "refusal": False,
+            "answer": "No matching data for this query. Please include the scheme name (e.g. SBI ELSS Tax Saver Fund) and try again.",
+            "citation_url": "",
+            "last_updated_note": _last_updated_note(),
+            "suggested_query": _suggest_try_typing(query),
+        }
+        _response_cache_set(cache_key, out)
+        return out
+
+    top = chunks[0] if chunks else {}
+    source_url = (top.get("source_url") or "").strip()
+    statement_url = (top.get("statement_url") or "").strip()
+    mentions_fund = _query_mentions_fund(query)
+    asks_for_statement = _query_asks_for_statement(query)
+
+    if asks_for_statement and statement_url:
+        citation = statement_url if mentions_fund else ""
+        out = {
+            "refusal": False,
+            "answer": CANNED_STATEMENT_ANSWER,
+            "citation_url": citation,
+            "last_updated_note": _last_updated_note(),
+        }
+        _response_cache_set(cache_key, out)
+        return out
+
+    if llm_fn:
+        result = llm_fn(query, chunks)
+        answer = result.get("answer", "")
+    else:
+        answer = ""
+    citation_url = source_url if mentions_fund else ""
+    out = {
+        "refusal": False,
+        "answer": answer,
+        "citation_url": citation_url,
+        "last_updated_note": _last_updated_note(),
+    }
+    if _is_no_info_answer(answer):
+        out["suggested_query"] = _suggest_try_typing(query)
+    _response_cache_set(cache_key, out)
+    return out
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

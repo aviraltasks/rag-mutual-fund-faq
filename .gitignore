@@ -35,3 +35,4 @@ Thumbs.db
 # Phase 01- data/embeddings/
 # Phase 01- data/manifest/
 # Phase 01- data/last_scraped.txt
+.vercel

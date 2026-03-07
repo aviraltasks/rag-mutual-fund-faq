@@ -1,0 +1,10 @@
+# Use requirements-backend.txt (CPU-only torch) for Railway backend
+[phases.setup]
+nixPkgs = ["python312"]
+
+[phases.install]
+skip = true
+cmd = "pip install -r requirements-backend.txt"
+
+[start]
+cmd = "python backend_server.py"

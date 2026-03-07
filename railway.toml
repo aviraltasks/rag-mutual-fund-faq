@@ -1,0 +1,4 @@
+# Railway backend deployment (nixpacks.toml has build/start details)
+[deploy]
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
