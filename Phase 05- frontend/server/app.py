@@ -326,6 +326,7 @@ def run_chat_flow_sync(
     top = chunks[0] if chunks else {}
     source_url = (top.get("source_url") or "").strip()
     statement_url = (top.get("statement_url") or "").strip()
+    scheme_used = (top.get("fund_name") or "").strip()
     mentions_fund = _query_mentions_fund(query)
     asks_for_statement = _query_asks_for_statement(query)
 
@@ -336,6 +337,7 @@ def run_chat_flow_sync(
             "answer": CANNED_STATEMENT_ANSWER,
             "citation_url": citation,
             "last_updated_note": _last_updated_note(),
+            "scheme_used": scheme_used or None,
         }
         _response_cache_set(cache_key, out)
         return out
@@ -351,6 +353,7 @@ def run_chat_flow_sync(
         "answer": answer,
         "citation_url": citation_url,
         "last_updated_note": _last_updated_note(),
+        "scheme_used": scheme_used or None,
     }
     if _is_no_info_answer(answer):
         out["suggested_query"] = _suggest_try_typing(query)
@@ -437,6 +440,7 @@ async def chat(req: ChatRequest):
     top = chunks[0] if chunks else {}
     source_url = (top.get("source_url") or "").strip()
     statement_url = (top.get("statement_url") or "").strip()
+    scheme_used = (top.get("fund_name") or "").strip() or None
     mentions_fund = _query_mentions_fund(query)
     asks_for_statement = _query_asks_for_statement(query)
 
@@ -448,6 +452,7 @@ async def chat(req: ChatRequest):
             "answer": CANNED_STATEMENT_ANSWER,
             "citation_url": citation,
             "last_updated_note": _last_updated_note(),
+            "scheme_used": scheme_used,
         }
         _response_cache_set(cache_key, out)
         return out
@@ -472,6 +477,7 @@ async def chat(req: ChatRequest):
         "answer": answer,
         "citation_url": citation_url,
         "last_updated_note": _last_updated_note(),
+        "scheme_used": scheme_used,
     }
     if _is_no_info_answer(answer):
         out["suggested_query"] = _suggest_try_typing(query)

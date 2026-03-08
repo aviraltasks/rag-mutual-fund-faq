@@ -109,6 +109,12 @@
         lastUpdatedNote: data.last_updated_note || null,
         suggestedQuery: data.suggested_query || null,
       });
+      if (data.scheme_used) {
+        var hintEl = document.getElementById('scheme-hint');
+        var hintNameEl = document.getElementById('scheme-hint-name');
+        if (hintNameEl) hintNameEl.textContent = data.scheme_used;
+        if (hintEl) hintEl.style.display = 'block';
+      }
     } catch (err) {
       addMessage('assistant', 'Unable to reach the server. Please try again.', { refusal: true });
     } finally {
@@ -128,18 +134,24 @@
 
   var schemeHintEl = document.getElementById('scheme-hint');
   var schemeHintNameEl = document.getElementById('scheme-hint-name');
+  var FUNDS = [
+    'SBI US Specific Equity Active FoF Fund',
+    'SBI Nifty Index Fund',
+    'SBI Flexicap Fund',
+    'SBI ELSS Tax Saver Fund',
+    'SBI Large Cap Fund'
+  ];
+  var roundRobinIndex = 0;
   document.querySelectorAll('.ask-about-link').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var q = this.getAttribute('data-query');
       var scheme = this.getAttribute('data-scheme');
-      if (q) {
-        input.value = q;
-        input.focus();
-      }
-      if (schemeHintNameEl && scheme) {
-        schemeHintNameEl.textContent = scheme;
-        if (schemeHintEl) schemeHintEl.style.display = 'block';
-      }
+      if (!q) return;
+      var chosenFund = FUNDS[roundRobinIndex % FUNDS.length];
+      roundRobinIndex += 1;
+      var newQuery = scheme ? q.replace(new RegExp(scheme.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), chosenFund) : q;
+      input.value = newQuery;
+      form.requestSubmit();
     });
   });
 })();

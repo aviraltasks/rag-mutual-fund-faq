@@ -675,6 +675,13 @@ body {
   text-decoration: underline;
 }
 
+.credit-tagline {
+  font-size: 0.7rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  color: var(--text-muted);
+}
+
 /* Narrow layout: stack columns + mobile tweaks */
 @media (max-width: 768px) {
   .app.layout-two-col,
