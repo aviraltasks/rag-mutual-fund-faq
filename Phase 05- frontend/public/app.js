@@ -76,8 +76,17 @@
   }
 
   function setLoading(loading) {
+    if (!sendBtn) return;
     sendBtn.disabled = loading;
-    sendBtn.textContent = loading ? '…' : 'Send';
+    if (loading) {
+      sendBtn.setAttribute('aria-busy', 'true');
+      sendBtn.classList.add('loading');
+      sendBtn.innerHTML = '<span class="send-spinner" aria-hidden="true"></span> Searching…';
+    } else {
+      sendBtn.removeAttribute('aria-busy');
+      sendBtn.classList.remove('loading');
+      sendBtn.textContent = 'Send';
+    }
   }
 
   form.addEventListener('submit', async function (e) {

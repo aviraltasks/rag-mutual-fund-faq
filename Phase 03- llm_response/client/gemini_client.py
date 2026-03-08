@@ -13,6 +13,54 @@ from prompts import SYSTEM_INSTRUCTIONS, build_user_message
 
 # Fallback when no context or API error
 NO_INFO_MESSAGE = "I don't have that information in my sources."
+
+# Trailing fragments that indicate truncation: mid-word (thi, whi), conjunctions (but, and, or), or prepositions (the, for, with, ...) at end = incomplete
+_BROKEN_ENDINGS = re.compile(
+    r"\s+(thi|but|and|or|an|the|for|with|to|of|in|on|at|by|as|so|when|which|whi|wha|ho|ha)\s*\.?\s*$",
+    re.I,
+)
+# Valid sentence-ending punctuation
+_SENTENCE_END = re.compile(r"[.!?]\s*$")
+
+
+def _ensure_complete_ending(answer: str) -> str:
+    """Ensure the answer is well-formed: no trailing incomplete fragments, always ends at a sentence boundary."""
+    if not answer:
+        return answer
+    stripped = answer.strip()
+    if len(stripped) < 3:
+        return stripped
+
+    # 1) Strip known incomplete trailing fragments (e.g. " thi.", " but.", " and.", " the.")
+    if _BROKEN_ENDINGS.search(stripped):
+        cleaned = _BROKEN_ENDINGS.sub("", stripped).strip()
+        if _SENTENCE_END.search(cleaned):
+            return cleaned
+        # If remainder ends with comma, it's a complete clause that just lost the period—add it
+        if cleaned.rstrip().endswith(","):
+            return cleaned.rstrip(" \t,") + "."
+        # No period at end; maybe the tail after last period is an incomplete fragment—truncate to last sentence
+        for sep in (".", "?", "!"):
+            idx = cleaned.rfind(sep)
+            if idx > 0:
+                tail = cleaned[idx + 1 :].strip()
+                if len(tail) <= 25:
+                    return cleaned[: idx + 1].strip()
+                break
+        return cleaned.rstrip(" \t,") + "."
+
+    # 2) If still not ending with . ? !, truncate to last sentence so we never show "...," or "word" without period
+    if not _SENTENCE_END.search(stripped):
+        for sep in (".", "?", "!"):
+            idx = stripped.rfind(sep)
+            if idx > 0:
+                return stripped[: idx + 1].strip()
+        # No sentence end at all: add a period so it doesn't look incomplete
+        return stripped.rstrip(" \t,") + "."
+
+    return stripped
+
+
 OUT_OF_SCOPE_MESSAGE = "That is out of scope for this assistant. I only answer factual questions about the mutual funds in my sources."
 DEFAULT_LAST_UPDATED = "Last updated from sources: see citation link."
 
@@ -67,7 +115,14 @@ def _extract_from_context_if_present(question: str, context: str) -> str | None:
                 if value and len(value) <= max_len:
                     return f"The {label} is {value}."
                 if value and len(value) > max_len:
-                    value = value[: max_len - 3].rstrip() + "..."
+                    # Truncate at word boundary so we never end with "thi." or half-words
+                    truncated = value[: max_len - 3]
+                    last_space = truncated.rfind(" ")
+                    if last_space > max_len // 2:
+                        truncated = truncated[:last_space]
+                    else:
+                        truncated = truncated.rstrip()
+                    value = truncated + "..."
                     return f"The {label} is {value}."
     return None
 
@@ -116,7 +171,7 @@ def generate_response(question: str, chunks: list[dict]) -> dict:
     extracted = _extract_from_context_if_present(question, context)
     if extracted:
         return {
-            "answer": extracted,
+            "answer": _ensure_complete_ending(extracted),
             "citation_url": citation_url,
             "last_updated_note": _format_last_updated(),
         }
@@ -137,19 +192,21 @@ def generate_response(question: str, chunks: list[dict]) -> dict:
         response = model.generate_content(
             [SYSTEM_INSTRUCTIONS, user_message],
             generation_config=genai.types.GenerationConfig(
-                max_output_tokens=256,
+                max_output_tokens=512,
                 temperature=0.1,
             ),
         )
         answer = (response.text or "").strip() if response.candidates else ""
         if not answer:
             answer = NO_INFO_MESSAGE
+        else:
+            answer = _ensure_complete_ending(answer)
         # Fallback: if LLM still said "no info", try extraction again (e.g. different phrasing in context)
         _no_info_core = "don't have that information in my sources"
         if _no_info_core.lower() in answer.lower():
             extracted = _extract_from_context_if_present(question, context)
             if extracted:
-                answer = extracted
+                answer = _ensure_complete_ending(extracted)
         return {
             "answer": answer,
             "citation_url": citation_url,
@@ -160,7 +217,7 @@ def generate_response(question: str, chunks: list[dict]) -> dict:
         extracted = _extract_from_context_if_present(question, context)
         if extracted:
             return {
-                "answer": extracted,
+                "answer": _ensure_complete_ending(extracted),
                 "citation_url": citation_url,
                 "last_updated_note": _format_last_updated(),
             }

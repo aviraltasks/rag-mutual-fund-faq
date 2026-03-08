@@ -76,9 +76,9 @@ def test_fallback_no_scheme():
 
 
 def test_fallback_no_intent():
-    """Scheme but no intent keyword -> return input unchanged."""
+    """Scheme but no intent keyword -> expand to about-section question for that scheme."""
     out = expand_query_for_retrieval("tell me about sbi large cap fund")
-    assert out == "tell me about sbi large cap fund"
+    assert out == "What is the fund objective and about section for SBI Large Cap Fund?"
 
 
 def test_fallback_empty():

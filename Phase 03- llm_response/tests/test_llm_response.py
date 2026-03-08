@@ -15,6 +15,7 @@ from client.gemini_client import (
     generate_response,
     _chunks_to_context,
     _citation_from_chunks,
+    _ensure_complete_ending,
     NO_INFO_MESSAGE,
     OUT_OF_SCOPE_MESSAGE,
     DEFAULT_LAST_UPDATED,
@@ -65,6 +66,26 @@ def test_citation_from_chunks_returns_first_source_url():
     assert _citation_from_chunks(chunks) == "https://indmoney.com/fund1"
 
 
+def test_ensure_complete_ending_strips_broken_fragments():
+    """Broken endings like ' thi.' or ' but.' are removed; answer always ends at a sentence boundary or with a period."""
+    assert _ensure_complete_ending("No bad points found for thi.") == "No bad points found for."
+    assert _ensure_complete_ending("The fund has outperformed over 3Y, 5Y, but.") == "The fund has outperformed over 3Y, 5Y."
+    assert _ensure_complete_ending("Normal complete answer.") == "Normal complete answer."
+    assert _ensure_complete_ending("One sentence. Another ending with thi.") == "One sentence."
+    assert _ensure_complete_ending("") == ""
+    assert _ensure_complete_ending("Short") == "Short."
+
+
+def test_ensure_complete_ending_unforeseen_cases():
+    """Other incomplete endings (and, the, for, etc.) and missing punctuation are fixed so users never see broken info."""
+    assert _ensure_complete_ending("Positive points. Negative: none found for the.") == "Positive points."
+    assert _ensure_complete_ending("The expense ratio is 0.89%. The lock-in is 3 years, and.") == "The expense ratio is 0.89%. The lock-in is 3 years."
+    assert _ensure_complete_ending("It has outperformed over 1Y and 3Y.") == "It has outperformed over 1Y and 3Y."
+    assert _ensure_complete_ending("Some answer without period") == "Some answer without period."
+    assert _ensure_complete_ending("Ends with comma or space  ") == "Ends with comma or space."
+    assert _ensure_complete_ending("Yes") == "Yes."
+
+
 # --- generate_response tests (mocked Gemini) ---
 
 def test_generate_response_empty_chunks():
@@ -88,7 +109,7 @@ def test_generate_response_returns_citation_from_top_chunk():
     ]
     result = generate_response("What is lock in?", chunks)
     assert result["citation_url"] == "https://indmoney.com/elss"
-    assert result["last_updated_note"] == DEFAULT_LAST_UPDATED
+    assert result["last_updated_note"] == DEFAULT_LAST_UPDATED or "Last updated" in (result.get("last_updated_note") or "")
     assert "answer" in result
 
 

@@ -264,8 +264,8 @@ body {
 }
 
 .disclaimer.banner {
-  background: var(--accent-light);
-  border: none;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   color: var(--text);
   padding: 0.6rem 1rem;
   border-radius: var(--radius);
@@ -624,6 +624,26 @@ body {
 .chat-send:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Loading state: spinner + "Searching..." so user knows to wait */
+.chat-send.loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.chat-send .send-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: send-spin 0.7s linear infinite;
+}
+@keyframes send-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Chat panel footer – separator + Last Updated only; right below form */

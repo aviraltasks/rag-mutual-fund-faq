@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from fastapi.testclient import TestClient
-from server.app import app
+from server.app import app, run_chat_flow_sync
 
 client = TestClient(app)
 
@@ -138,6 +138,62 @@ def test_chat_full_flow_factual_answer_with_mocked_backends():
     assert "Last Updated On" in note, "last_updated_note must contain 'Last Updated On'"
     assert any(c.isdigit() for c in note), "last_updated_note must contain a date/time (digit), not placeholder like —"
     assert "0.89" in data["answer"] or "expense" in data["answer"].lower()
+    assert data.get("scheme_used") == "SBI ELSS", "response must include scheme_used from top chunk fund_name"
+
+
+def test_index_html_has_built_with_cursor_credit():
+    """Credit block must include 'Built with Cursor' in smaller font (credit-tagline)."""
+    r = client.get("/")
+    assert r.status_code == 200
+    html = r.text
+    assert "Built with Cursor" in html, "index.html must contain Built with Cursor credit line"
+    assert "credit-tagline" in html, "credit-tagline class must be present for smaller font"
+
+
+def test_index_html_has_send_button_for_loading_state():
+    """Send button must have class chat-send so app.js can attach loading spinner and Searching…."""
+    r = client.get("/")
+    assert r.status_code == 200
+    html = r.text
+    assert "chat-send" in html, "index.html must contain Send button with class chat-send"
+    assert "Send" in html, "Send button must show 'Send' label when not loading"
+
+
+def test_app_js_has_loading_state_ui():
+    """app.js must implement animated fetching: spinner, Searching… text, aria-busy."""
+    r = client.get("/static/app.js")
+    assert r.status_code == 200
+    js = r.text
+    assert "send-spinner" in js, "app.js must inject send-spinner element when loading"
+    assert "Searching" in js, "app.js must show Searching… while fetching"
+    assert "aria-busy" in js, "app.js must set aria-busy for accessibility when loading"
+    assert "setLoading" in js, "app.js must define setLoading for submit handler"
+
+
+def test_styles_css_has_spinner_animation():
+    """styles.css must define spinner and keyframes for Send button loading state."""
+    r = client.get("/static/styles.css")
+    assert r.status_code == 200
+    css = r.text
+    assert "send-spinner" in css or ".send-spinner" in css, "styles.css must style .send-spinner"
+    assert "send-spin" in css, "styles.css must define send-spin keyframe animation"
+    assert "chat-send.loading" in css or ".chat-send.loading" in css, "styles.css must style loading state"
+
+
+def test_run_chat_flow_sync_returns_scheme_used_from_top_chunk():
+    """run_chat_flow_sync (used by Railway backend) must include scheme_used from top chunk fund_name."""
+    def safety_fn(q):
+        return {"allowed": True, "refusal_message": None, "educational_link": None}
+    def retrieve_fn(q):
+        return [
+            {"chunk_id": "c1", "text": "NAV: 100.", "fund_name": "SBI Nifty Index Fund", "source_url": "https://x.com", "statement_url": ""}
+        ]
+    def llm_fn(q, chunks):
+        return {"answer": "The NAV is 100.", "citation_url": "https://x.com", "last_updated_note": "Last Updated On 01 Jan 2025"}
+    out = run_chat_flow_sync("What is the NAV of SBI Nifty Index Fund?", safety_fn=safety_fn, retrieve_fn=retrieve_fn, llm_fn=llm_fn)
+    assert "error" not in out, f"expected success, got: {out}"
+    assert out.get("refusal") is not True
+    assert out.get("scheme_used") == "SBI Nifty Index Fund", f"scheme_used must be top chunk fund_name, got: {out.get('scheme_used')!r}"
 
 
 def test_chat_response_cache_returns_same_for_repeated_query():
