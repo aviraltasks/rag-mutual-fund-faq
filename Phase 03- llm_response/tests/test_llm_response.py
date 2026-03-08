@@ -86,6 +86,24 @@ def test_ensure_complete_ending_unforeseen_cases():
     assert _ensure_complete_ending("Yes") == "Yes."
 
 
+def test_ensure_complete_ending_strips_truncated_words_like_categor():
+    """Mid-word truncations (e.g. 'categor.' instead of 'category') are stripped; remainder ends properly."""
+    # Pros/cons answer that ended with "categor." -> strip and end at complete sentence
+    s = "The Fund Pros and Cons is Positive: Beats FD returns. Negative: 5Y returns in the bottom 25% of the categor."
+    out = _ensure_complete_ending(s)
+    assert "categor" not in out, "Truncated word must be removed"
+    assert out.endswith("."), "Must end with period"
+    assert out == "The Fund Pros and Cons is Positive: Beats FD returns. Negative: 5Y returns in the bottom 25%."
+
+
+def test_ensure_complete_ending_other_truncation_stems():
+    """Other known truncation stems (probabl., perfor., etc.) are stripped; no broken word at end."""
+    assert _ensure_complete_ending("Lower probability of downside risk. Higher probabl.") == "Lower probability of downside risk. Higher."
+    assert _ensure_complete_ending("The fund has strong perfor.") == "The fund has strong."
+    out = _ensure_complete_ending("Benchmark is Nifty 50. Outperformed benchmar.")
+    assert "benchmar" not in out and out.endswith(".")
+
+
 # --- generate_response tests (mocked Gemini) ---
 
 def test_generate_response_empty_chunks():

@@ -14,11 +14,14 @@ from prompts import SYSTEM_INSTRUCTIONS, build_user_message
 # Fallback when no context or API error
 NO_INFO_MESSAGE = "I don't have that information in my sources."
 
-# Trailing fragments that indicate truncation: mid-word (thi, whi), conjunctions (but, and, or), or prepositions (the, for, with, ...) at end = incomplete
+# Trailing fragments: mid-word truncations (categor, probabl), conjunctions (but, and, or), prepositions (the, for, of, ...)
 _BROKEN_ENDINGS = re.compile(
-    r"\s+(thi|but|and|or|an|the|for|with|to|of|in|on|at|by|as|so|when|which|whi|wha|ho|ha)\s*\.?\s*$",
+    r"\s+(thi|but|and|or|an|the|for|with|to|of|in|on|at|by|as|so|when|which|whi|wha|ho|ha"
+    r"|categor|probabl|perfor|percenta|compari|informa|benchmar)\s*\.?\s*$",
     re.I,
 )
+# Incomplete phrase at end after stripping (e.g. "...of the") — truncate to previous sentence
+_INCOMPLETE_PHRASE_END = re.compile(r"\s+of\s+(?:the\s*)?\.?\s*$", re.I)
 # Valid sentence-ending punctuation
 _SENTENCE_END = re.compile(r"[.!?]\s*$")
 
@@ -31,20 +34,26 @@ def _ensure_complete_ending(answer: str) -> str:
     if len(stripped) < 3:
         return stripped
 
-    # 1) Strip known incomplete trailing fragments (e.g. " thi.", " but.", " and.", " the.")
+    # 1) Strip known incomplete trailing fragments (e.g. " thi.", " but.", " categor.", " the.")
     if _BROKEN_ENDINGS.search(stripped):
         cleaned = _BROKEN_ENDINGS.sub("", stripped).strip()
         if _SENTENCE_END.search(cleaned):
             return cleaned
+        # After stripping we may have "...of the" or "...of" — remove that phrase then end with period (keep both sentences)
+        if _INCOMPLETE_PHRASE_END.search(cleaned):
+            cleaned = _INCOMPLETE_PHRASE_END.sub("", cleaned).strip()
+            if _SENTENCE_END.search(cleaned):
+                return cleaned
+            return cleaned.rstrip(" \t,") + "."
         # If remainder ends with comma, it's a complete clause that just lost the period—add it
         if cleaned.rstrip().endswith(","):
             return cleaned.rstrip(" \t,") + "."
-        # No period at end; maybe the tail after last period is an incomplete fragment—truncate to last sentence
+        # No period at end; only truncate if the tail after last period is a multi-word fragment (e.g. "Another ending with")
         for sep in (".", "?", "!"):
             idx = cleaned.rfind(sep)
             if idx > 0:
                 tail = cleaned[idx + 1 :].strip()
-                if len(tail) <= 25:
+                if len(tail) <= 25 and " " in tail:
                     return cleaned[: idx + 1].strip()
                 break
         return cleaned.rstrip(" \t,") + "."
